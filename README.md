@@ -10,12 +10,13 @@
 
 ## What Does It Do?
 
-As distributed systems become increasingly popular, the reliability and stability between services is becoming more important than ever before. Sentinel takes "flow" as breakthrough point, and works on multiple fields including **flow control**, **concurrency**, **circuit breaking** and **load protection**, to protect service reliability.
+As distributed systems become increasingly popular, the reliability between services is becoming more important than ever before.
+Sentinel takes "flow" as breakthrough point, and works on multiple fields including **flow control**, **circuit breaking** and **system adaptive protection**, to guarantee service reliability.
 
 Sentinel has the following features:
 
 - **Rich applicable scenarios**:
-Sentinel has been wildly used in Alibaba, and has covered almost all the core-scenarios in Double-11 (11.11) Shopping Festivals in the past 10 years, such as “Second Kill” which needs to limit burst flow traffic to meet the system capacity, message peak clipping and valley fills, degrading unreliable downstream applications, etc.
+Sentinel has been wildly used in Alibaba, and has covered almost all the core-scenarios in Double-11 (11.11) Shopping Festivals in the past 10 years, such as “Second Kill” which needs to limit burst flow traffic to meet the system capacity, message peak clipping and valley fills, circuit breaking for unreliable downstream services, cluster flow control, etc.
 
 - **Real-time monitoring**:
 Sentinel also provides real-time monitoring ability. You can see the runtime information of a single machine in real-time, and the aggregated runtime info of a cluster with less than 500 nodes.
@@ -83,7 +84,7 @@ So far the code modification is done. We also provide [annotation support module
 If we want to limit the access times of the resource, we can define rules. The following code defines a rule that limits access to the reource to 20 times per second at the maximum. 
 
 ```java
-List<FlowRule> rules = new ArrayList<FlowRule>();
+List<FlowRule> rules = new ArrayList<>();
 FlowRule rule = new FlowRule();
 rule.setResource("HelloWorld");
 // set limit qps to 20
@@ -138,6 +139,12 @@ Contact us: sentinel@linux.alibaba.com
 
 Contributions are always welcomed! Please see [CONTRIBUTING](./CONTRIBUTING.md) for detailed guidelines.
 
+## Credits
+
+Thanks [Guava](https://github.com/google/guava), which provides some inspiration on rate limiting.
+
+And thanks for all [contributors](https://github.com/alibaba/Sentinel/graphs/contributors) of Sentinel!
+
 ## Who is using
 
 These are only part of the companies using Sentinel, for reference only. If you are using Sentinel, please [add your company here](https://github.com/alibaba/Sentinel/issues/18) to tell us your scenario to make Sentinel better :)
@@ -155,3 +162,4 @@ These are only part of the companies using Sentinel, for reference only. If you 
 ![金汇金融](https://res.jinhui365.com/r/images/logo2.png?v=1.527)
 ![Vivo](https://user-images.githubusercontent.com/9434884/49355264-c6f87600-f701-11e8-8109-054cf91df868.png)
 ![闪电购](http://cdn.52shangou.com/shandianbang/official-source/3.1.1/build/images/logo.png)
+![拼多多](http://cdn.pinduoduo.com/assets/img/pdd_logo_v3.png)
