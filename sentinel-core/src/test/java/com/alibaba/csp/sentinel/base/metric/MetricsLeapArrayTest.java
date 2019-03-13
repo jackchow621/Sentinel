@@ -25,6 +25,7 @@ import com.alibaba.csp.sentinel.slots.statistic.data.MetricBucket;
 import com.alibaba.csp.sentinel.util.TimeUtil;
 import com.alibaba.csp.sentinel.slots.statistic.base.WindowWrap;
 import com.alibaba.csp.sentinel.slots.statistic.metric.MetricsLeapArray;
+import com.alibaba.csp.sentinel.test.AbstractTimeBasedTest;
 
 import org.junit.Test;
 
@@ -35,7 +36,7 @@ import static org.junit.Assert.*;
  *
  * @author Eric Zhao
  */
-public class MetricsLeapArrayTest {
+public class MetricsLeapArrayTest extends AbstractTimeBasedTest {
 
     private final int windowLengthInMs = 1000;
     private final int intervalInSec = 2;
@@ -79,8 +80,8 @@ public class MetricsLeapArrayTest {
         MetricBucket currentWindow = window.value();
         assertNotNull(currentWindow);
 
-        currentWindow.addPass();
-        currentWindow.addBlock();
+        currentWindow.addPass(1);
+        currentWindow.addBlock(1);
         assertEquals(1L, currentWindow.pass());
         assertEquals(1L, currentWindow.block());
 
@@ -90,7 +91,7 @@ public class MetricsLeapArrayTest {
         assertEquals(previousWindowStart, window.windowStart());
 
         MetricBucket middleWindow = window.value();
-        middleWindow.addPass();
+        middleWindow.addPass(1);
         assertSame(currentWindow, middleWindow);
         assertEquals(2L, middleWindow.pass());
         assertEquals(1L, middleWindow.block());
@@ -114,7 +115,7 @@ public class MetricsLeapArrayTest {
         List<WindowWrap<MetricBucket>> firstIterWindowList = new ArrayList<WindowWrap<MetricBucket>>(len);
         for (int i = 0; i < len; i++) {
             WindowWrap<MetricBucket> w = leapArray.currentWindow(firstTime + windowLengthInMs * i);
-            w.value().addPass();
+            w.value().addPass(1);
             firstIterWindowList.add(i, w);
         }
 
@@ -133,7 +134,7 @@ public class MetricsLeapArrayTest {
         Runnable task = new Runnable() {
             @Override
             public void run() {
-                leapArray.currentWindow(time).value().addPass();
+                leapArray.currentWindow(time).value().addPass(1);
                 latch.countDown();
             }
         };
@@ -149,6 +150,7 @@ public class MetricsLeapArrayTest {
 
     @Test
     public void testGetPreviousWindow() {
+        setCurrentMillis(System.currentTimeMillis());
         MetricsLeapArray leapArray = new MetricsLeapArray(sampleCount, intervalInMs);
         long time = TimeUtil.currentTimeMillis();
         WindowWrap<MetricBucket> previousWindow = leapArray.currentWindow(time);
@@ -166,7 +168,9 @@ public class MetricsLeapArrayTest {
         final int windowLengthInMs = 100;
         final int intervalInMs = 1000;
         final int sampleCount = intervalInMs / windowLengthInMs;
-
+        
+        setCurrentMillis(System.currentTimeMillis());
+        
         MetricsLeapArray leapArray = new MetricsLeapArray(sampleCount, intervalInMs);
         long time = TimeUtil.currentTimeMillis();
 
@@ -180,10 +184,10 @@ public class MetricsLeapArrayTest {
             assertTrue(windowWraps.contains(wrap));
         }
 
-        Thread.sleep(windowLengthInMs + intervalInMs);
+        sleep(windowLengthInMs + intervalInMs);
 
         // This will replace the deprecated bucket, so all deprecated buckets will be reset.
-        leapArray.currentWindow(time + windowLengthInMs + intervalInMs).value().addPass();
+        leapArray.currentWindow(time + windowLengthInMs + intervalInMs).value().addPass(1);
 
         assertEquals(1, leapArray.list().size());
     }
@@ -194,7 +198,7 @@ public class MetricsLeapArrayTest {
         final int intervalInSec = 1;
         final int intervalInMs = intervalInSec * 1000;
         final int sampleCount = intervalInMs / windowLengthInMs;
-
+        
         MetricsLeapArray leapArray = new MetricsLeapArray(sampleCount, intervalInMs);
         long time = TimeUtil.currentTimeMillis();
 
@@ -203,7 +207,7 @@ public class MetricsLeapArrayTest {
         windowWraps.add(leapArray.currentWindow(time));
         windowWraps.add(leapArray.currentWindow(time + windowLengthInMs));
 
-        Thread.sleep(intervalInSec * 1000 + windowLengthInMs * 3);
+        sleep(intervalInMs + windowLengthInMs * 3);
 
         List<WindowWrap<MetricBucket>> list = leapArray.list();
         for (WindowWrap<MetricBucket> wrap : list) {
@@ -212,7 +216,7 @@ public class MetricsLeapArrayTest {
 
         // This won't hit deprecated bucket, so no deprecated buckets will be reset.
         // But deprecated buckets can be filtered when collecting list.
-        leapArray.currentWindow(TimeUtil.currentTimeMillis()).value().addPass();
+        leapArray.currentWindow(TimeUtil.currentTimeMillis()).value().addPass(1);
 
         assertEquals(1, leapArray.list().size());
     }
